@@ -1,4 +1,4 @@
-This is the code of compression algorithms of our RoX project. For more details, please refer to http://sing.cse.ust.hk/projects/RoX. 
+This is the code of compression algorithms of our RoX project. For more details, please refer to http://sing.cse.ust.hk/projects/XPath. 
 
 general_code: code without knowing the DCN topology and user preferences.
 
