@@ -1,5 +1,0 @@
-LMax= 2     S[0]=4; S[1]=4; 
-The running time of creating spanning trees is: 0.000000
-the TotalTNum is: 32
-the routing table size is: 20
-The running time of creating spanning trees is: 0.000000
