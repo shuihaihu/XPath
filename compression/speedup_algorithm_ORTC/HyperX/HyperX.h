@@ -1,0 +1,15 @@
+const int LMax=4;
+const int S[LMax]={16, 16, 16, 16};
+const int Smax=65536;
+const int Pmax=60;
+const int SingleTNum=LMax;
+const int TotalTNum=Smax*LMax;
+const int MaxInt=99999999;
+const int Maskcode=0x000000ff;
+const int RoundMax=1000;
+const double Randa=0.5;
+const int MaxExchangetime=100;
+const int IPv4len=32;
+int IPsegsz[IPv4len]={0};
+const int MapLen=3;
+const int Intbitlen=sizeof(int)*8;

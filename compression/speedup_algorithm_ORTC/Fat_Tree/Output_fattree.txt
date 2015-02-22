@@ -1,0 +1,20 @@
+podsize= 8
+The running time of creating spanning trees is: 0.000135
+the TotalTNum is: 512
+the routing table size is: 188
+The running time of compute maxORT is: 0.017374
+podsize= 16
+The running time of creating spanning trees is: 0.026573
+the TotalTNum is: 8192
+the routing table size is: 4218
+The running time of compute maxORT is: 1.143435
+podsize= 32
+The running time of creating spanning trees is: 1.781495
+the TotalTNum is: 131072
+the routing table size is: 82768
+The running time of compute maxORT is: 91.300525
+podsize= 64
+The running time of creating spanning trees is: 289.397479
+the TotalTNum is: 2097152
+the routing table size is: 1552190
+The running time of compute maxORT is: 6897.177742

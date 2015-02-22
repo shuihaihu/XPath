@@ -1,0 +1,84 @@
+LevelNum= 2 N= 4
+The running time of creating spanning trees is: 0.000000
+the routing table size is: 9
+The running time of creating spanning trees is: 0.000000
+LevelNum= 2 N= 4
+The running time of creating spanning trees is: 0.000000
+the routing table size is: 9
+The running time of creating spanning trees is: 0.000000
+LevelNum= 2 N= 4
+The running time of creating spanning trees is: 0.000000
+the routing table size is: 9
+The running time of creating spanning trees is: 0.000000
+LevelNum= 2 N= 4
+The running time of creating spanning trees is: 0.000000
+the routing table size is: 9
+The running time of creating spanning trees is: 0.000000
+LevelNum= 2 N= 4
+The running time of creating spanning trees is: 0.000000
+the routing table size is: 9
+The running time of creating spanning trees is: 0.000000
+LevelNum= 2 N= 4
+The running time of creating spanning trees is: 0.000000
+the routing table size is: 9
+The running time of creating spanning trees is: 0.000000
+LevelNum= 2 N= 4
+The running time of creating spanning trees is: 0.000000
+the routing table size is: 9
+The running time of creating spanning trees is: 0.000000
+LevelNum= 2 N= 4
+The running time of creating spanning trees is: 0.000000
+the routing table size is: 9
+The running time of creating spanning trees is: 0.000000
+LevelNum= 2 N= 4
+The running time of creating spanning trees is: 0.000000
+the routing table size is: 9
+The running time of creating spanning trees is: 0.000000
+LevelNum= 2 N= 4
+The running time of creating spanning trees is: 0.000000
+the routing table size is: 9
+The running time of creating spanning trees is: 0.000000
+LevelNum= 2 N= 4
+The running time of creating spanning trees is: 0.000000
+the routing table size is: 9
+The running time of creating spanning trees is: 0.000000
+LevelNum= 2 N= 4
+The running time of creating spanning trees is: 0.000000
+the routing table size is: 9
+The running time of creating spanning trees is: 0.000000
+LevelNum= 2 N= 4
+The running time of creating spanning trees is: 0.000000
+the routing table size is: 9
+The running time of creating spanning trees is: 0.000000
+LevelNum= 2 N= 8
+The running time of creating spanning trees is: 0.000000
+the routing table size is: 17
+The running time of creating spanning trees is: 0.000000
+LevelNum= 2 N= 8
+The running time of creating spanning trees is: 0.000000
+the routing table size is: 17
+The running time of creating spanning trees is: 0.000000
+LevelNum= 3 N= 4
+The running time of creating spanning trees is: 0.000000
+the routing table size is: 108
+The running time of creating spanning trees is: 0.000000
+LevelNum= 2 N= 4
+The running time of creating spanning trees is: 0.000000
+the routing table size is: 9
+The running time of creating spanning trees is: 0.000000
+LevelNum= 2 N= 4
+The running time of creating spanning trees is: 0.000000
+the routing table size is: 9
+The running time of creating spanning trees is: 0.000000
+LevelNum= 2 N= 4
+The running time of creating spanning trees is: 0.000000
+the routing table size is: 9
+The running time of creating spanning trees is: 0.000000
+LevelNum= 3 N= 4
+The running time of creating spanning trees is: 0.000000
+the routing table size is: 108
+The running time of creating spanning trees is: 0.030000
+LevelNum= 3 N= 8
+The running time of creating spanning trees is: 0.250000
+the routing table size is: 522
+The running time of creating spanning trees is: 0.190000
