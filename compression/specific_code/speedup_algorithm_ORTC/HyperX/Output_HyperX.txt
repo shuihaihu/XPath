@@ -1,0 +1,95 @@
+LMax= 3     S[0]=4; S[1]=4; S[2]=4; 
+The running time of creating spanning trees is: 0.001284
+the TotalTNum is: 192
+the routing table size is: 88
+The running time of compute maxORT is: 0.009444
+LMax= 3     S[0]=8; S[1]=8; S[2]=8; 
+The running time of creating spanning trees is: 0.110203
+the TotalTNum is: 1536
+the routing table size is: 290
+The running time of compute maxORT is: 0.897686
+LMax= 4     S[0]=10; S[1]=10; S[2]=10; S[3]=10; 
+The running time of creating spanning trees is: 64.331557
+the TotalTNum is: 40000
+the routing table size is: 4652
+The running time of compute maxORT is: 1120.715945
+LMax= 3     S[0]=4; S[1]=4; S[2]=4; 
+The running time of creating spanning trees is: 0.001323
+the TotalTNum is: 192
+the routing table size is: 88
+The running time of compute maxORT is: 0.003508
+LMax= 3     S[0]=8; S[1]=8; S[2]=8; 
+The running time of creating spanning trees is: 0.100740
+the TotalTNum is: 1536
+the routing table size is: 290
+The running time of compute maxORT is: 0.208644
+LMax= 4     S[0]=10; S[1]=10; S[2]=10; S[3]=10; 
+The running time of creating spanning trees is: 70.922718
+the TotalTNum is: 40000
+the routing table size is: 4652
+The running time of compute maxORT is: 140.022037
+LMax= 4     S[0]=16; S[1]=16; S[2]=16; S[3]=16; 
+The running time of creating spanning trees is: 6616.034189
+the TotalTNum is: 262144
+the routing table size is: 17249
+The running time of compute maxORT is: 3874.308225
+LMax= 3     S[0]=4; S[1]=4; S[2]=4; 
+The running time of creating spanning trees is: 0.001298
+the TotalTNum is: 192
+the routing table size is: 88
+The running time of compute maxORT is: 0.003431
+LMax= 3     S[0]=4; S[1]=4; S[2]=4; 
+The running time of creating spanning trees is: 0.001287
+the TotalTNum is: 192
+the routing table size is: 88
+The running time of compute maxORT is: 0.003433
+LMax= 3     S[0]=8; S[1]=8; S[2]=8; 
+The running time of creating spanning trees is: 0.098209
+the TotalTNum is: 1536
+the routing table size is: 290
+The running time of compute maxORT is: 0.201037
+LMax= 4     S[0]=10; S[1]=10; S[2]=10; S[3]=10; 
+The running time of creating spanning trees is: 60.102607
+the TotalTNum is: 40000
+the routing table size is: 4652
+The running time of compute maxORT is: 127.369252
+LMax= 3     S[0]=4; S[1]=4; S[2]=4; 
+The running time of creating spanning trees is: 0.001265
+the TotalTNum is: 192
+the routing table size is: 81
+The running time of compute maxORT is: 0.003377
+LMax= 3     S[0]=8; S[1]=8; S[2]=8; 
+The running time of creating spanning trees is: 0.099392
+the TotalTNum is: 1536
+the routing table size is: 317
+The running time of compute maxORT is: 0.204271
+LMax= 4     S[0]=10; S[1]=10; S[2]=10; S[3]=10; 
+The running time of creating spanning trees is: 61.440444
+the TotalTNum is: 40000
+the routing table size is: 4674
+The running time of compute maxORT is: 125.395547
+LMax= 4     S[0]=16; S[1]=16; S[2]=16; S[3]=16; 
+The running time of creating spanning trees is: 6734.792623
+the TotalTNum is: 262144
+the routing table size is: 19110
+The running time of compute maxORT is: 3936.341507
+LMax= 3     S[0]=4; S[1]=4; S[2]=4; 
+The running time of creating spanning trees is: 0.001390
+the TotalTNum is: 192
+the routing table size is: 128
+The running time of compute maxORT is: 0.003797
+LMax= 3     S[0]=8; S[1]=8; S[2]=8; 
+The running time of creating spanning trees is: 0.100720
+the TotalTNum is: 1536
+the routing table size is: 1181
+The running time of compute maxORT is: 0.250399
+LMax= 4     S[0]=10; S[1]=10; S[2]=10; S[3]=10; 
+The running time of creating spanning trees is: 67.574360
+the TotalTNum is: 40000
+the routing table size is: 32145
+The running time of compute maxORT is: 162.304749
+LMax= 4     S[0]=16; S[1]=16; S[2]=16; S[3]=16; 
+The running time of creating spanning trees is: 6473.652840
+the TotalTNum is: 262144
+the routing table size is: 221637
+The running time of compute maxORT is: 5613.848126

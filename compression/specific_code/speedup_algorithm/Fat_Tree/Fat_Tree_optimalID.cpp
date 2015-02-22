@@ -243,37 +243,6 @@ int CCencoding(int (*ST)[TotalTNum], ofstream &output){
 		cout<<endl;
 	}  
     cout<<endl;*/
-
-  /* optimal encoding */
-  int curID=0;
-  for(int t=0; t<Tmax; t=t++) // enumerate IDs of trees dested for each edgeswitch
-    for (int i=0; i<EdgeSwitchNum; i++) //enumerate edgeswitch
-      FinalID[i*Tmax+t]=curID++;
-  LocateTable_init(LocateTable, FinalID);
-  currentMS_init(currentMS, LocateTable, ST);
-   
-  answer=0;
-  for(int i=0; i<Smax; i++){
-    //cout<<"i = "<<currentMS[i]<<endl;
-    if(currentMS[i]>answer){
-      answer=currentMS[i];
-    }
-  }
-if(answer<FinalAnswer){
-		FinalAnswer=answer;
-		printRange(0, EdgeSwitchNum, currentMS);
-		printRange(EdgeSwitchNum, EdgeSwitchNum+AggreSwitchNum, currentMS);
-		printRange(EdgeSwitchNum+AggreSwitchNum, Smax, currentMS);
-    //for (int i=0; i<TotalTNum; i++)
-    //  cout<<FinalID[i]<<endl;
-    for(int sw=10; sw<11; sw++){
-      cout<<"switch "<<sw<<endl;
-      for(int id=0; id<TotalTNum; id++)
-        cout<<" "<<id<<" "<<ST[sw][LocateTable[id]]<<endl;
-    }
-	}
-
-/* end of optimal encoding */ 
 	KeySwitch=0;
 	temp=computeMinMax(KeySwitch, FinalID, LocateTable, currentMS, ST);
 	if(temp<FinalAnswer){
@@ -281,8 +250,6 @@ if(answer<FinalAnswer){
 		printRange(0, EdgeSwitchNum, currentMS);
 		printRange(EdgeSwitchNum, EdgeSwitchNum+AggreSwitchNum, currentMS);
 		printRange(EdgeSwitchNum+AggreSwitchNum, Smax, currentMS);
-    for (int i=0; i<TotalTNum; i++)
-      cout<<" "<<FinalID[i]<<endl;
 	}
 	cout<<( TotalTNum*(EdgeSwitchNum-1) )<<" "<<TotalTNum<<" "<<temp;
 

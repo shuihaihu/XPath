@@ -126,7 +126,7 @@ int createSpanningTree(int (*ST)[TotalTNum]){
 
 int SwitchOptimalEncoding(int s, int *FinalID, int (*ST)[TotalTNum]){
 	int CurrentID;
-	int *flag=new int[TotalTNum];
+int *flag=new int[TotalTNum];
 	memset(flag,0, sizeof(int)*TotalTNum);
 	CurrentID=0;
 	for(int i=0; i<TotalTNum; i++)
@@ -186,103 +186,184 @@ int printRange(int StartSNum, int EndSNum, int *currentMS){
 
 	return 0;
 }
-int computeMinMax(int KeySwitch, int *FinalID,
-					  int *LocateTable, int *currentMS, int (*ST)[TotalTNum]){
-			int answer=0;
 
-			SwitchOptimalEncoding(KeySwitch, FinalID, ST);
-			LocateTable_init(LocateTable, FinalID);
-		    currentMS_init(currentMS, LocateTable, ST);
+int local_OptIP(int s, int *IP, int (*ST)[TotalTNum]){
+  int blocksz[Pmax+1];
+  int porder[Pmax+1];
+  int *flag=new int[TotalTNum];
+  memset(flag,0, sizeof(int)*TotalTNum);
 
-			for(int i=0; i<Smax; i++){
-				//cout<<"i = "<<currentMS[i]<<endl;
-				if(currentMS[i]>answer){
-					answer=currentMS[i];
-				}
-			}
+  for(int i=0; i<TotalTNum; i++) //compute block size;
+  if(flag[i]==0) {
+    flag[i]=1;
+    blocksz[ST[s][i]]=1;
+    for(int j=i+1; j<TotalTNum; j++)        
+      if(ST[s][j]==ST[s][i]){
+        flag[j]=1;
+        blocksz[ST[s][i]++];
+      }
+  }
 
-			/*for(int i=0; i<Smax; i++){
-				cout<<"Switch number "<<i<<": "<<currentMS[i]<<endl;
-				for(int j=0; j<TotalTNum; j++)
-					cout<<ST[i][ LocateTable[j] ]<<" ";
-				cout<<endl;
-			}*/ 
-			//cout<<"after conflict correcting_3: "<<answer<<endl;
-			/*			int index;
-			for(int i=0; i<TotalTNum; i++)
-				cout<<ST[index][LocateTable[i]]<<" ";
-			cout<<endl;*/ 
-			//cout<<endl;
+  int sorted[Pmax+1];
+  memset(sorted, 0, sizeof(int)*(Pmax+1) );
+  for(int round=0; round<=Pmax; round++){
+    int maxbsz=-MaxInt;
+    int maxp;
+    for(int p=0; p<=Pmax; p++) 
+      if(sorted[p]==0 && blocksz[p]>maxbsz){
+        maxbsz=blocksz[p];
+        maxp=p;
+      }
+    porder[round]=maxp;
+    sorted[maxp]=1;
+  }
 
-			return answer;
+  int b_startIP=0;
+  int curIP=b_startIP;
+  for(int round=0; round<=Pmax; round++){
+    int curport=porder[round];
+    for(int ps=0; i<TotalTNum; i++)
+      if(ST[s][ps]==curport)
+        IP[ps]=curIP++;
+    for(int i=0; i<IPv4len; i++)
+      if(IPsegsz[i]>=blocksz[curport]){
+        b_startIP+=IPsegsz[i];
+        curIP=b_startIP;
+        break;
+      }
+  }
+  delete[] flag;
+  return 0;
+}
+
+int compute_ORT(int s, int *IP, ORTC_node *ORTC_tree, 
+					  int ORTC_nnum, int ORTC_leafnnum, int (*ST)[TotalTNum]){
+  int leaf_startn=ORTC_nnum-ORTC_leafnnum;
+ for(int node=0; node<ORTC_nnum; node++){
+     memset(ORTC_tree[node].portmap, 0, sizeof(int)*(Pmax+1) );
+     memset(ORTC_tree[node].routemap, 0, sizeof(int)*(Pmax+1) );
+  }
+ for(int node=leaf_startn; node<ORTC_nnum; node++)
+   ORTC_tree[node].portmap[0]=1;
+ for(int ps=0; ps<TotalTNum; ps++){
+   int ip=IP[ps];
+   ORTC_tree[leaf_startn+ip].portmap[ST[s][ps]]=1;
+   ORTC_tree[leaf_startn+ip].portmap[0]=0;
+ }
+
+ for(int node=leaf_startn-1; node>=0; node--){
+   int lch=2*node+1;
+   int rch=2*node+2;
+   int intersec=0;
+   for(int bit=0; bit<=Pmax; bit++)
+     if( (ORTC_tree[lch].portmap[bit] & ORTC_tree[rch].portmap[bit])==1 ){
+       intersec=1;
+       break;
+     }
+   if(intersec==0){
+   for(int bit=0; bit<=Pmax; bit++)
+     ORTC_tree[node].portmap[bit]= ORTC_tree[lch].portmap[bit] | ORTC_tree[rch].portmap[bit];
+   }else{
+     for(int bit=0; bit<=Pmax; bit++)
+       ORTC_tree[node].portmap[bit]= ORTC_tree[lch].portmap[bit] & ORTC_tree[rch].portmap[bit];
+   }
+ }
+
+ ORTC_tree[0].prefix_enable=0;
+ for(int bit=0; bit<=Pmax; bit++)
+   if(ORTC_tree[0].portmap[bit]==1){
+     ORTC_tree[0].routemap[bit]=1;
+     if(bit!=0)
+       ORTC_tree[0].prefix_enable=1;
+     break;
+   }
+ for(int node=1; node<=ORTC_nnum; node++){
+   int parent=(node-1)/2;
+   int hasdupp=0;
+   for(int bit=0; bit<=Pmax; bit++)
+     if( (ORTC_tree[node].portmap[bit] & ORTC_tree[parent].routemap[bit])==1 ){
+       hasdupp=1;
+       break;
+     }
+   if(hasdupp==1){
+     ORTC_tree[node].prefix_enable=0;
+     for(int bit=0; bit<=Pmax; bit++)
+       ORTC_tree[node].routemap[bit]=ORTC_tree[parent].routemap[bit];
+   }else{
+     for(int bit=0; bit<=Pmax; bit++)
+       if(ORTC_tree[node].portmap[bit]==1){
+         ORTC_tree[node].routemap[bit]=1;
+         if(bit!=0)
+           ORTC_tree[node].prefix_enable=1;
+         else ORTC_tree[node].prefix_enable=0;
+         break;
+       }
+
+     for(int bit=0; bit<=Pmax; bit++)
+       ORTC_tree[node].routemap[bit]=OORTC_tree[node].routemap[bit] | RTC_tree[parent].routemap[bit];
+
+   }
+ }
+
+ int prefixnum=0;
+ for(int node=0; node<ORTC_nnum; node++)
+   if(ORTC_tree[node].prefix_enable==1)
+     prefixnum++;
+
+ return prefixnum;
 
 
 }
-int CCencoding(int (*ST)[TotalTNum], ofstream &output){
-	int *FinalID=new int[TotalTNum];
-	int *LocateTable=new int[TotalTNum];
-	int currentMS[Smax];
+
+int get_maxORT(int KeySwitch, int *IP, int ORTC_nnum, int ORTC_leafnnum, 
+    ORTC_node *ORTC_tree, int (*ST)[TotalTNum]){
+			int answer=0;
+
+			local_OptIP(KeySwitch, IP, ST);
+
+			for(int i=0; i<Smax; i++){
+				int curORTsz=compute_ORT(i, IP, ORTC_nnum, ORTC_leafnnum, ORTC_tree, ST);
+        if(curORTsz>answer){
+					answer=curORTsz;
+				}
+			}
+			return answer;
+}
+class ORTC_node{
+  public:
+    int *portmap[Pmax+1];
+    int *routemap[Pmax+1];
+    int prefix_enable;
+}
+int CCencoding_ORTC(int (*ST)[TotalTNum], ofstream &output){
+	int *IP=new int[TotalTNum];
+  int ORTC_nnum;
+  int ORTC_leafnnum;
+	ORTC_node *ORTC_tree;
 	int KeySwitch;
 	int FinalAnswer=MaxInt;
-	int temp;
+	int temp=1;
 
-	for(int j=0; j<TotalTNum; j++)
-		FinalID[j]=j;
-	LocateTable_init(LocateTable,FinalID);
-	currentMS_init(currentMS, LocateTable, ST);
-
-	int answer=0;
-	for(int i=0; i<Smax; i++)
-		if(currentMS[i]>answer)
-			answer=currentMS[i];
-	//cout<<"before conflict correcting_3: "<<answer<<endl;
-	/*for(int i=0; i<Smax; i++){
-		cout<<"Switch number "<<i<<": "<<currentMS[i]<<endl;
-		for(int j=0; j<TotalTNum; j++)
-			cout<<ST[i][ LocateTable[j] ]<<" ";
-		cout<<endl;
-	}  
-    cout<<endl;*/
-
-  /* optimal encoding */
-  int curID=0;
-  for(int t=0; t<Tmax; t=t++) // enumerate IDs of trees dested for each edgeswitch
-    for (int i=0; i<EdgeSwitchNum; i++) //enumerate edgeswitch
-      FinalID[i*Tmax+t]=curID++;
-  LocateTable_init(LocateTable, FinalID);
-  currentMS_init(currentMS, LocateTable, ST);
-   
-  answer=0;
-  for(int i=0; i<Smax; i++){
-    //cout<<"i = "<<currentMS[i]<<endl;
-    if(currentMS[i]>answer){
-      answer=currentMS[i];
-    }
+  temp=1;
+  for(int i=0; i<IPv4len; i++){
+    IPsegsz[i]=temp;
+    temp=temp<<1;
   }
-if(answer<FinalAnswer){
-		FinalAnswer=answer;
-		printRange(0, EdgeSwitchNum, currentMS);
-		printRange(EdgeSwitchNum, EdgeSwitchNum+AggreSwitchNum, currentMS);
-		printRange(EdgeSwitchNum+AggreSwitchNum, Smax, currentMS);
-    //for (int i=0; i<TotalTNum; i++)
-    //  cout<<FinalID[i]<<endl;
-    for(int sw=10; sw<11; sw++){
-      cout<<"switch "<<sw<<endl;
-      for(int id=0; id<TotalTNum; id++)
-        cout<<" "<<id<<" "<<ST[sw][LocateTable[id]]<<endl;
+  for(int i=0; i<IPv4len; i++)
+    if(IPsegsz[i]>=2*TotalTNum){
+      ORTC_leafnnum=IPsegsz[i];
+      ORTC_nnum=2*ORTC_leafnnum-1;
+      break;
     }
-	}
+  ORTC_tree=new ORTC_node[ORTC_nnum];
 
-/* end of optimal encoding */ 
 	KeySwitch=0;
-	temp=computeMinMax(KeySwitch, FinalID, LocateTable, currentMS, ST);
+	temp=get_maxORT(KeySwitch, IP, ORTC_nnum, ORTC_leafnnum, ORTC_tree, ST);
 	if(temp<FinalAnswer){
 		FinalAnswer=temp;
 		printRange(0, EdgeSwitchNum, currentMS);
 		printRange(EdgeSwitchNum, EdgeSwitchNum+AggreSwitchNum, currentMS);
 		printRange(EdgeSwitchNum+AggreSwitchNum, Smax, currentMS);
-    for (int i=0; i<TotalTNum; i++)
-      cout<<" "<<FinalID[i]<<endl;
 	}
 	cout<<( TotalTNum*(EdgeSwitchNum-1) )<<" "<<TotalTNum<<" "<<temp;
 
@@ -311,8 +392,8 @@ if(answer<FinalAnswer){
 	//LocateTable_init(LocateTable,FinalID,ST);
 	//currentMS_init(currentMS, LocateTable, ST);
 
-	delete[] FinalID;
-	delete[] LocateTable;
+	delete[] IP;
+	delete[] ORTC_tree;
 	return 0;
 
 }

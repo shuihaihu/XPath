@@ -21,14 +21,14 @@ int createSpanningTree(int (*ST)[TotalTNum]);
 int SwitchOptimalEncoding(int *FinalID, int (*ST)[TotalTNum]);
 int currentMS_init(int *currentMS, int *LocateTable, int (*ST)[TotalTNum]);
 int LocateTable_init(int *LocateTable, int *FinalID, int (*ST)[TotalTNum]);
-int CCencoding(int (*ST)[TotalTNum], ofstream &output);
+int CCencoding_ORTC(int (*ST)[TotalTNum], ofstream &output);
 
 
 int main(){
 	int (*ST)[TotalTNum]=new int[Smax][TotalTNum];
 	clock_t start, finish;   
 	double     duration; 
-	ofstream output("Bcube_Output.txt",ios::app);
+	ofstream output("Output_BCube.txt",ios::app);
 	output<<setiosflags(ios::fixed)<<setprecision(6);
 
 	output<<"LevelNum= "<<LevelNum<<" N= "<<N<<endl; 
@@ -50,11 +50,11 @@ int main(){
 	  cout<<endl;
   }*/   
 	start=clock();   
-	CCencoding(ST,output);
+	CCencoding_ORTC(ST,output);
 	finish=clock();   
 	duration=(double)(finish-start)/CLOCKS_PER_SEC; 
 	//cout<<"The running time of creating spanning trees is: "<<duration<<endl; 
-	output<<"The running time of creating spanning trees is: "<<duration<<endl; 
+	output<<"The running time of compute maxORT is: "<<duration<<endl; 
 
   delete[] ST;
   output.close();
@@ -303,88 +303,247 @@ int printRange(int StartSNum, int EndSNum, int *currentMS){
   return 0;
 }
 
-int CCencoding(int (*ST)[TotalTNum], ofstream &output){
-	int *FinalID=new int[TotalTNum];
-	int *LocateTable=new int[TotalTNum];
-	int currentMS[Smax];
+class ORTC_node{
+public:
+	unsigned int portmap[MapLen];
+	unsigned int routemap[MapLen];
+	int prefix_enable;
+};
+
+int local_OptIP(int s, int * flag, int *IP, int (*ST)[TotalTNum], int maxIP){
+	int blocksz[Pmax+1]={0};
+	int porder[Pmax+1]={0};
+
+	memset(flag, 0, sizeof(int)*TotalTNum);
+
+	for(int i=0; i<TotalTNum; i++) //compute block size;
+		if(flag[i]==0) {
+			flag[i]=1;
+			blocksz[ST[s][i]]=1;
+			for(int j=i+1; j<TotalTNum; j++)        
+				if(ST[s][j]==ST[s][i]){
+					flag[j]=1;
+					blocksz[ST[s][i]]++;
+				}
+		}
+
+		//  for(int i=0; i<=Pmax; i++)
+		//    cout<<" blocksz["<<i<<"]= "<<blocksz[i];
+		//  cout<<endl;
+
+		int sorted[Pmax+1];
+		memset(sorted, 0, sizeof(int)*(Pmax+1) );
+		for(int round=0; round<=Pmax; round++){
+			int maxbsz=0;
+			int maxp;
+			for(int p=0; p<=Pmax; p++) 
+				if(sorted[p]==0 && blocksz[p]>maxbsz){
+					maxbsz=blocksz[p];
+					maxp=p;
+				}
+				if(maxbsz>0){
+					porder[round]=maxp;
+					sorted[maxp]=1;
+				} else
+					porder[round]=-1;
+		}
+		//for(int i=0; i<=Pmax; i++)
+		//  cout<<" porder["<<i<<"]= "<<porder[i];
+		//cout<<endl;
+
+		int b_startIP=0;
+		int curIP=b_startIP;
+		for(int round=0; round<=Pmax; round++)
+			if( porder[round]>=0 ){
+				int curport=porder[round];
+				//	cout<<" curport "<<curport<<endl;
+				for(int ps=0; ps<TotalTNum; ps++)
+					if(ST[s][ps]==curport)
+						IP[ps]=curIP++;
+				if(curIP>maxIP)
+					cout<<"error1"<<endl;
+				for(int i=0; i<IPv4len; i++)
+					if(IPsegsz[i]>=blocksz[curport]){
+						b_startIP+=IPsegsz[i];
+						curIP=b_startIP;
+						break;
+					}
+			}
+			return 0;
+}
+
+int compute_ORT(int s, int *IP, int ORTC_nnum, int ORTC_leafnnum,
+				ORTC_node *ORTC_tree, int (*ST)[TotalTNum]){
+					int leaf_startn=ORTC_nnum-ORTC_leafnnum;
+					for(int node=0; node<ORTC_nnum; node++){
+						memset(ORTC_tree[node].portmap, 0, sizeof(int)*(MapLen) );
+						memset(ORTC_tree[node].routemap, 0, sizeof(int)*(MapLen) );
+					}
+					for(int node=leaf_startn; node<ORTC_nnum; node++)
+						ORTC_tree[node].portmap[0]=1;
+					int ip=0;
+					int outport=0;
+					for(int ps=0; ps<TotalTNum; ps++){
+						ip=IP[ps];
+						outport=ST[s][ps];
+						ORTC_tree[leaf_startn+ip].portmap[0]=0;
+						if( ip<0 || (leaf_startn+ip)>=ORTC_nnum)
+							cout<<"error2"<<endl;
+						for(int map=0; map<MapLen; map++)
+							if(Intbitlen*(map+1)>outport){
+								ORTC_tree[leaf_startn+ip].portmap[map]= 1 << (outport-map*Intbitlen);
+								break;
+							}
+					}
+
+					for(int node=leaf_startn-1; node>=0; node--){
+						int lch=2*node+1;
+						int rch=2*node+2;
+						if( (rch)>ORTC_nnum)
+							cout<<"error3"<<endl;
+						int intersec=0;
+						for(int map=0; map<MapLen; map++)
+							if( (ORTC_tree[lch].portmap[map] & ORTC_tree[rch].portmap[map])!=0 ){
+								intersec=1;
+								break;
+							}
+							if(intersec==0){
+								for(int map=0; map<MapLen; map++)
+									ORTC_tree[node].portmap[map]= ORTC_tree[lch].portmap[map] | ORTC_tree[rch].portmap[map];
+							}else{
+								for(int map=0; map<MapLen; map++)
+									ORTC_tree[node].portmap[map]= ORTC_tree[lch].portmap[map] & ORTC_tree[rch].portmap[map];
+							}
+					}
+
+					ORTC_tree[0].prefix_enable=0;
+					for(int map=0; map<MapLen; map++)
+						if(ORTC_tree[0].portmap[map]!=0){
+							for(int bit=0; bit<Intbitlen; bit++)
+								if( ( ORTC_tree[0].portmap[map] & (unsigned int)(1<<bit) )!=0 ){
+									ORTC_tree[0].routemap[map]=(unsigned int)(1<<bit);
+									if(bit!=0 | map!=0)
+										ORTC_tree[0].prefix_enable=1;
+									break;
+								}
+								break;
+						}
+						for(int node=1; node<ORTC_nnum; node++){
+							int parent=(node-1)/2;
+							int hasdupp=0;
+							for(int map=0; map<MapLen; map++)
+								if( (ORTC_tree[node].portmap[map] & ORTC_tree[parent].routemap[map])!=0 ){
+									hasdupp=1;
+									break;
+								}
+								if(hasdupp==1){
+									ORTC_tree[node].prefix_enable=0;
+									for(int map=0; map<MapLen; map++)
+										ORTC_tree[node].routemap[map]=ORTC_tree[parent].routemap[map];
+								}else{
+									for(int map=0; map<MapLen; map++)
+										if(ORTC_tree[node].portmap[map]!=0){
+											for(int bit=0; bit<Intbitlen; bit++)
+												if( ( ORTC_tree[node].portmap[map] & (unsigned int)(1<<bit) )!=0 ){
+													ORTC_tree[node].routemap[map]=(unsigned int)(1<<bit);
+													if(bit!=0 | map!=0)
+														ORTC_tree[node].prefix_enable=1;
+													else  ORTC_tree[node].prefix_enable=0;
+													break;
+												}
+												break;
+										}
+
+										for(int map=0; map<MapLen; map++)
+											ORTC_tree[node].routemap[map]=ORTC_tree[node].routemap[map] | ORTC_tree[parent].routemap[map];
+								}
+						}
+
+						int prefixnum=0;
+						for(int node=0; node<ORTC_nnum; node++)
+							if(ORTC_tree[node].prefix_enable==1)
+								prefixnum++;
+
+						return prefixnum;
+}
+
+
+int get_maxORT(int KeySwitch, int * flag, int *IP, int ORTC_nnum, int ORTC_leafnnum, 
+			   ORTC_node *ORTC_tree, int (*ST)[TotalTNum]){
+				   int answer=0;
+
+				   //local_OptIP(KeySwitch, flag, IP, ST, ORTC_leafnnum);
+				   //SwitchOptimalEncoding(KeySwitch,  IP, ST);
+
+
+				   int *isused=new int[TotalTNum];
+				   //int isused[TotalTNum];
+				   memset(isused, 0, sizeof(int)*(TotalTNum) );
+				   for(int i=0; i<TotalTNum; i++) {
+					   int ip=(int)( ((double)rand()/(double)RAND_MAX)*(double)TotalTNum);
+					   if(ip>=TotalTNum)
+						   ip=TotalTNum-1;
+					   while(isused[ip]==1)
+						   ip=(ip+1)%TotalTNum;
+					   IP[i]=ip;
+					   isused[ip]=1;
+				   }
+
+
+				   for(int i=0; i<Smax; i++){
+					   int curORTsz=compute_ORT(i, IP, ORTC_nnum, ORTC_leafnnum, ORTC_tree, ST);
+					   if(curORTsz>answer){
+						   answer=curORTsz;
+					   }
+				   }
+				   return answer;
+}
+
+int CCencoding_ORTC(int (*ST)[TotalTNum], ofstream &output){
+	int *IP=new int[TotalTNum];
+	int ORTC_nnum;
+	int ORTC_leafnnum;
+	ORTC_node *ORTC_tree;
 	int KeySwitch;
 	int FinalAnswer=MaxInt;
-	int temp;
+	int temp=1;
+	int *flag=new int[TotalTNum];
 
-	for(int j=0; j<TotalTNum; j++)
-		FinalID[j]=j;
-	LocateTable_init(LocateTable,FinalID);
-	currentMS_init(currentMS, LocateTable, ST);
-
-	int answer=0;
-	for(int i=0; i<Smax; i++)
-		if(currentMS[i]>answer)
-			answer=currentMS[i];
-	//cout<<"before conflict correcting: "<<answer<<endl;
-
-/* optimal encoding 
-  int curID=0;
-  //for(int t=0; t<SingleSPT; t=t++)
-  //  for (int i=0; i<serverNum; i++)
-  //    FinalID[i*SingleSPT+t]=curID++;
-  for (int i=0; i<serverNum; i++) 
-    for(int t=0; t<SingleSPT; t++)
-      FinalID[i*SingleSPT+t]=curID++; 
-  LocateTable_init(LocateTable, FinalID);
-  currentMS_init(currentMS, LocateTable, ST);
-
-  answer=0;
-  for(int i=0; i<Smax; i++){
-    if(currentMS[i]>answer)
-      answer=currentMS[i];
-  }
-
-  if(answer<FinalAnswer){
-    FinalAnswer=answer;
-    printRange(0, serverNum, currentMS);
-    printRange(serverNum, serverNum+singleLSNum, currentMS); 
-    printRange(serverNum+singleLSNum, Smax, currentMS);
-    for (int i=0; i<TotalTNum; i++)
-      cout<<FinalID[i]<<endl;
-    for(int sw=0; sw<1; sw++){
-      cout<<"switch "<<sw<<endl;
-      for(int id=0; id<TotalTNum; id++)
-        cout<<" "<<id<<" "<<ST[sw][id]<<endl;
-    }
-  }
-end of optimal encoding*/ 
+	temp=1;
+	for(int i=0; i<IPv4len; i++){
+		IPsegsz[i]=temp;
+		temp=temp<<1;
+	}
+	for(int i=0; i<IPv4len; i++)
+		if(IPsegsz[i]>=2*TotalTNum){
+			ORTC_leafnnum=IPsegsz[i];
+			ORTC_nnum=2*ORTC_leafnnum-1;
+			break;
+		}
+		ORTC_tree=new ORTC_node[ORTC_nnum];
 
 	KeySwitch=0;
-	temp=computeMinMax(KeySwitch, FinalID, LocateTable, currentMS, ST);
+	temp=get_maxORT(KeySwitch, flag, IP, ORTC_nnum, ORTC_leafnnum, ORTC_tree, ST);
   if(temp<FinalAnswer){
     FinalAnswer=temp;
-    printRange(0, serverNum, currentMS);
-    printRange(serverNum, serverNum+singleLSNum, currentMS);
-    printRange(serverNum+singleLSNum, Smax, currentMS);
-    for (int i=0; i<TotalTNum; i++)
-      cout<<FinalID[i]<<endl;
-    for(int sw=0; sw<16; sw++){
-      cout<<"switch "<<sw<<endl;
-      for(int id=0; id<TotalTNum; id++)
-        cout<<" "<<id<<" "<<ST[sw][LocateTable[id]]<<endl;
+   // printRange(0, serverNum, currentMS);
+   // printRange(serverNum, serverNum+singleLSNum, currentMS);
+    //printRange(serverNum+singleLSNum, Smax, currentMS);
     }
 
-  }
 
-	for(int i=0; i<LevelNum; i++){
+/*	for(int i=0; i<LevelNum; i++){
 		KeySwitch=serverNum+singleLSNum*i;
-		temp=computeMinMax(KeySwitch, FinalID, LocateTable, currentMS, ST);
+		temp=get_maxORT(KeySwitch, flag, IP, ORTC_nnum, ORTC_leafnnum, ORTC_tree, ST);
 		if(temp<FinalAnswer)
 			FinalAnswer=temp;
-	}
+	}*/ 
 
 	output<<"the routing table size is: "<<FinalAnswer<<endl;
-	//currentMS_init(FinalID,ST);
-	//LocateTable_init(LocateTable,FinalID,ST);
-	//currentMS_init(currentMS, LocateTable, ST);
 
-	delete[] FinalID;
-	delete[] LocateTable;
+	delete[] IP;
+	delete[] flag;
+	delete[] ORTC_tree;
 	return 0;
 
 }
