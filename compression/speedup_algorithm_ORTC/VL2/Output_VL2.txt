@@ -70,3 +70,7 @@ DA= 100 DI= 96
 The running time of creating spanning trees is: 13.141362
 the routing table size is: 118267
 The running time of compute maxORT is: 621.740324
+DA= 40 DI= 16
+The running time of creating spanning trees is: 0.014621
+the routing table size is: 2559
+The running time of compute maxORT is: 1.147556

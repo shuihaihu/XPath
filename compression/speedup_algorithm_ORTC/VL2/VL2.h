@@ -1,5 +1,5 @@
-const int DA=100;
-const int DI=96;
+const int DA=40;
+const int DI=16;
 const int TorSNum=DA*DI/4;
 const int AggrSNum=DI;
 const int IntSNum=DA/2;

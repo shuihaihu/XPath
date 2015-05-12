@@ -333,10 +333,10 @@ int get_maxORT(int KeySwitch, int * flag, int *IP, int ORTC_nnum, int ORTC_leafn
 			   ORTC_node *ORTC_tree, int (*ST)[TotalTNum]){
 				   int answer=0;
 
-				   //local_OptIP(KeySwitch, flag, IP, ST, ORTC_leafnnum);
+				  local_OptIP(KeySwitch, flag, IP, ST, ORTC_leafnnum);
 				  // SwitchOptimalEncoding(KeySwitch,  IP, ST);
 
-				   int *isused=new int[TotalTNum];
+				 /*  int *isused=new int[TotalTNum];
 				   //int isused[TotalTNum];
 				   memset(isused, 0, sizeof(int)*(TotalTNum) );
 				   for(int i=0; i<TotalTNum; i++) {
@@ -347,7 +347,7 @@ int get_maxORT(int KeySwitch, int * flag, int *IP, int ORTC_nnum, int ORTC_leafn
 						   ip=(ip+1)%TotalTNum;
 					   IP[i]=ip;
 					   isused[ip]=1;
-				   }
+				   } */
 
 
 				   for(int i=0; i<Smax; i++){

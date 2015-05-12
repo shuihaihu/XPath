@@ -1,4 +1,4 @@
-const int podsize=64;
+const int podsize=8;
 const int podnum=podsize;
 const int EdgeSwitchNum=podnum*podsize/2;
 const int AggreSwitchNum=podnum*podsize/2;

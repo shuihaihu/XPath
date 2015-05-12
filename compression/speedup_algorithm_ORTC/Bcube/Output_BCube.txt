@@ -18,3 +18,14 @@ LevelNum= 5 N= 8
 The running time of creating spanning trees is: 1584.958270
 the routing table size is: 55717
 The running time of compute maxORT is: 3454.280291
+LevelNum= 5 N= 8
+LevelNum= 5 N= 8
+LevelNum= 5 N= 8
+LevelNum= 2 N= 4
+The running time of creating spanning trees is: 0.000064
+the routing table size is: 17
+The running time of compute maxORT is: 0.000167
+LevelNum= 3 N= 4
+The running time of creating spanning trees is: 0.001307
+the routing table size is: 74
+The running time of compute maxORT is: 0.005255

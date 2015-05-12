@@ -1,7 +1,7 @@
-const int LevelNum=5;
-const int N=8;
-const int serverNum=N*N*N*N*N;
-const int singleLSNum=N*N*N*N;
+const int LevelNum=3;
+const int N=4;
+const int serverNum=N*N*N;
+const int singleLSNum=N*N;
 const int SingleSPT=LevelNum;
 const int SwitchNum=singleLSNum*LevelNum;
 const int Smax=serverNum+SwitchNum;

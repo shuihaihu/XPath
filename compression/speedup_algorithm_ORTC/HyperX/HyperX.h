@@ -1,7 +1,7 @@
-const int LMax=4;
-const int S[LMax]={16, 16, 16, 16};
-const int Smax=65536;
-const int Pmax=60;
+const int LMax=3;
+const int S[LMax]={8, 8, 8};
+const int Smax=512;
+const int Pmax=21;
 const int SingleTNum=LMax;
 const int TotalTNum=Smax*LMax;
 const int MaxInt=99999999;

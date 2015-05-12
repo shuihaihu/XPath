@@ -93,3 +93,8 @@ The running time of creating spanning trees is: 6473.652840
 the TotalTNum is: 262144
 the routing table size is: 221637
 The running time of compute maxORT is: 5613.848126
+LMax= 3     S[0]=8; S[1]=8; S[2]=8; 
+The running time of creating spanning trees is: 0.097157
+the TotalTNum is: 1536
+the routing table size is: 290
+The running time of compute maxORT is: 0.192488
