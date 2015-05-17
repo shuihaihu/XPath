@@ -21,7 +21,7 @@ int createSpanningTree(int (*ST)[TotalTNum]);
 int SwitchOptimalEncoding(int *FinalID, int (*ST)[TotalTNum]);
 int currentMS_init(int *currentMS, int *LocateTable, int (*ST)[TotalTNum]);
 int LocateTable_init(int *LocateTable, int *FinalID, int (*ST)[TotalTNum]);
-int CCencoding_ORTC(int (*ST)[TotalTNum], ofstream &output);
+int IDencoding_ORTC(int (*ST)[TotalTNum], ofstream &output);
 
 
 int main(){
@@ -50,7 +50,7 @@ int main(){
 	  cout<<endl;
   }*/   
 	start=clock();   
-	CCencoding_ORTC(ST,output);
+	IDencoding_ORTC(ST,output);
 	finish=clock();   
 	duration=(double)(finish-start)/CLOCKS_PER_SEC; 
 	//cout<<"The running time of creating spanning trees is: "<<duration<<endl; 
@@ -311,7 +311,7 @@ public:
 };
 
 int local_OptIP(int s, int * flag, int *IP, int (*ST)[TotalTNum], int maxIP){
-	int blocksz[Pmax+1]={0};
+	unsigned int blocksz[Pmax+1]={0};
 	int porder[Pmax+1]={0};
 
 	memset(flag, 0, sizeof(int)*TotalTNum);
@@ -334,7 +334,7 @@ int local_OptIP(int s, int * flag, int *IP, int (*ST)[TotalTNum], int maxIP){
 		int sorted[Pmax+1];
 		memset(sorted, 0, sizeof(int)*(Pmax+1) );
 		for(int round=0; round<=Pmax; round++){
-			int maxbsz=0;
+			unsigned int maxbsz=0;
 			int maxp;
 			for(int p=0; p<=Pmax; p++) 
 				if(sorted[p]==0 && blocksz[p]>maxbsz){
@@ -422,7 +422,7 @@ int compute_ORT(int s, int *IP, int ORTC_nnum, int ORTC_leafnnum,
 							for(int bit=0; bit<Intbitlen; bit++)
 								if( ( ORTC_tree[0].portmap[map] & (unsigned int)(1<<bit) )!=0 ){
 									ORTC_tree[0].routemap[map]=(unsigned int)(1<<bit);
-									if(bit!=0 | map!=0)
+									if(bit!=0 || map!=0)
 										ORTC_tree[0].prefix_enable=1;
 									break;
 								}
@@ -446,7 +446,7 @@ int compute_ORT(int s, int *IP, int ORTC_nnum, int ORTC_leafnnum,
 											for(int bit=0; bit<Intbitlen; bit++)
 												if( ( ORTC_tree[node].portmap[map] & (unsigned int)(1<<bit) )!=0 ){
 													ORTC_tree[node].routemap[map]=(unsigned int)(1<<bit);
-													if(bit!=0 | map!=0)
+													if(bit!=0 || map!=0)
 														ORTC_tree[node].prefix_enable=1;
 													else  ORTC_tree[node].prefix_enable=0;
 													break;
@@ -468,38 +468,148 @@ int compute_ORT(int s, int *IP, int ORTC_nnum, int ORTC_leafnnum,
 }
 
 
-int get_maxORT(int KeySwitch, int * flag, int *IP, int ORTC_nnum, int ORTC_leafnnum, 
-			   ORTC_node *ORTC_tree, int (*ST)[TotalTNum]){
-				   int answer=0;
+int CCencoding_IP(int *flag, int *IP, int ORTC_nnum, int ORTC_leafnnum, 
+ORTC_node *ORTC_tree, int (*ST)[TotalTNum]){
+	//int maxip=ORTC_leafnnum;
+	//int (*er_ST)[TotalTNum]=new int[EclassNum][TotalTNum]; //equivalent-reduction ST;
+	int (*er_IP)[TotalTNum]=new int[EclassNum][TotalTNum]; //equivalent-reduction IP;
+	//int er_IP[EclassNum][TotalTNum]; //equivalent-reduction IP;
+	int min_switch=-1;
+	int min_value=MaxInt;
+	int (*ipindex)[2*TotalTNum]=new int[EclassNum][2*TotalTNum];
+	//int ipindex[EclassNum][2*TotalTNum];
+	int *initial_ips=new int[EclassNum];
+	//int initial_ips[EclassNum];
 
-				   local_OptIP(KeySwitch, flag, IP, ST, ORTC_leafnnum);
-				   //SwitchOptimalEncoding(KeySwitch,  IP, ST);
+	for(int i=0; i<EclassNum; i++){
+	  local_OptIP(EclassSID[i], flag, er_IP[i], ST, ORTC_leafnnum);  
+	}
 
 
-				 /*  int *isused=new int[TotalTNum];
-				   //int isused[TotalTNum];
-				   memset(isused, 0, sizeof(int)*(TotalTNum) );
-				   for(int i=0; i<TotalTNum; i++) {
-					   int ip=(int)( ((double)rand()/(double)RAND_MAX)*(double)TotalTNum);
-					   if(ip>=TotalTNum)
-						   ip=TotalTNum-1;
-					   while(isused[ip]==1)
-						   ip=(ip+1)%TotalTNum;
-					   IP[i]=ip;
-					   isused[ip]=1;
-				   } */
-             
+	memset(ipindex, -1, sizeof(int)*(EclassNum*2*TotalTNum));
+	for(int sid=0; sid<EclassNum; sid++){
+	  for(int i=0; i<TotalTNum; i++)
+		  ipindex[sid][er_IP[sid][i]]=i;
+	}
 
-				   for(int i=0; i<Smax; i++){
-					   int curORTsz=compute_ORT(i, IP, ORTC_nnum, ORTC_leafnnum, ORTC_tree, ST);
-					   if(curORTsz>answer){
-						   answer=curORTsz;
-					   }
-				   }
-				   return answer;
+	int considered=0;
+	for(int tree=0; tree<TotalTNum; tree++){
+	  min_value=MaxInt;
+	  min_switch=-1;
+	  for(int base_s=0; base_s<EclassNum; base_s++) {  //enumerate base switch
+		  int base_ip=er_IP[base_s][tree];
+		  considered=0;
+		  for(int c_s=0; c_s<base_s; c_s++){ //check whether base_ip has been considered;
+			  int c_ip=er_IP[c_s][tree];
+			  if(c_ip==base_ip){
+				  considered=1;
+				  break;
+			  }
+		  }
+		  if(considered==1)
+			  continue;
+		  int mrts=compute_ORT(EclassSID[base_s], er_IP[base_s], ORTC_nnum, ORTC_leafnnum, ORTC_tree, ST);  //initialize maximum routing table size
+		  int temp_rts=0;  //routing table size
+		  for(int c_s=0; c_s<EclassNum; c_s++)   //exchange ip
+			  if(c_s!=base_s){
+				  int c_ip=er_IP[c_s][tree];
+				  int exip_index=ipindex[c_s][base_ip]; //get the index of the ip to exchange with c_ip;
+				  initial_ips[c_s]=c_ip;
+				  er_IP[c_s][tree]=base_ip;
+				  if(exip_index!=-1){
+					  er_IP[c_s][exip_index]=c_ip;
+				  }
+
+				  temp_rts=compute_ORT(EclassSID[c_s], er_IP[c_s], ORTC_nnum, ORTC_leafnnum, ORTC_tree, ST);
+				  if(temp_rts>mrts)
+					  mrts=temp_rts;			
+			  }
+			  if(mrts<min_value){
+				  min_value=mrts;
+				  min_switch=base_s;
+			  }
+			  for(int c_s=0; c_s<EclassNum; c_s++)    //recovery
+				  if(c_s!=base_s){
+					  int exip_index=ipindex[c_s][base_ip];
+					  er_IP[c_s][tree]=initial_ips[c_s];
+					  if(exip_index!=-1){
+						  er_IP[c_s][exip_index]=base_ip;
+					  }
+				  }
+	  }
+	  for(int c_s=0; c_s<EclassNum; c_s++)    //exchange ip
+		  if(c_s!=min_switch){
+			  int min_ip=er_IP[min_switch][tree];
+			  int c_ip=er_IP[c_s][tree];
+			  int exip_index=ipindex[c_s][min_ip]; //get the index of the ip to exchange with c_ip;
+			  er_IP[c_s][tree]=min_ip;
+			  ipindex[c_s][c_ip]=-1;
+			  ipindex[c_s][min_ip]=tree;
+			  if(exip_index!=-1){
+				  er_IP[c_s][exip_index]=c_ip;
+				  ipindex[c_s][c_ip]=exip_index;
+			  }
+		  }
+	}
+	for(int i=0; i<TotalTNum; i++)
+	  for(int j=1; j<EclassNum; j++)
+		  if(er_IP[0][i]!=er_IP[j][i]){
+			  cout<<"ip inconsistent!";
+			  break;
+		  }
+  int *ipcount=new int[TotalTNum*2];
+  for(int sid=0; sid<EclassNum; sid++){
+	  memset(ipcount, 0, sizeof(int)*(TotalTNum*2));
+	  for(int i=0; i<TotalTNum; i++){
+		  ipcount[er_IP[sid][i]]++;
+		  if(ipcount[er_IP[sid][i]]>1){
+			  cout<<"ip duplication";
+			  break;
+		  }
+	  }
+
+  }
+
+  for(int i=0; i<TotalTNum; i++)
+	  IP[i]=er_IP[0][i];
+  return 0;
 }
 
-int CCencoding_ORTC(int (*ST)[TotalTNum], ofstream &output){
+
+int get_maxORT(int KeySwitch, int * flag, int *IP, int ORTC_nnum, int ORTC_leafnnum, 
+			   ORTC_node *ORTC_tree, int (*ST)[TotalTNum]){
+	   int answer=0;
+	   if(KeySwitch==-1){
+		   CCencoding_IP(flag, IP, ORTC_nnum, ORTC_leafnnum, ORTC_tree, ST);
+	   }else{
+		   local_OptIP(KeySwitch, flag, IP, ST, ORTC_leafnnum);
+	   //SwitchOptimalEncoding(KeySwitch,  IP, ST);
+
+
+	   /* int *isused=new int[TotalTNum];
+		//int isused[TotalTNum];
+		memset(isused, 0, sizeof(int)*(TotalTNum) );
+		for(int i=0; i<TotalTNum; i++) {
+		    int ip=(int)( ((double)rand()/(double)RAND_MAX)*(double)TotalTNum);
+		    if(ip>=TotalTNum)
+		       ip=TotalTNum-1;
+		    while(isused[ip]==1)
+		          ip=(ip+1)%TotalTNum;
+		    IP[i]=ip;
+		    isused[ip]=1;
+	    } */
+		}             
+
+	   for(int i=0; i<Smax; i++){
+		   int curORTsz=compute_ORT(i, IP, ORTC_nnum, ORTC_leafnnum, ORTC_tree, ST);
+		   if(curORTsz>answer){
+			   answer=curORTsz;
+		   }
+	   }
+	   return answer;
+}
+
+int IDencoding_ORTC(int (*ST)[TotalTNum], ofstream &output){
 	int *IP=new int[TotalTNum];
 	int ORTC_nnum;
 	int ORTC_leafnnum;
@@ -520,7 +630,14 @@ int CCencoding_ORTC(int (*ST)[TotalTNum], ofstream &output){
 			ORTC_nnum=2*ORTC_leafnnum-1;
 			break;
 		}
-		ORTC_tree=new ORTC_node[ORTC_nnum];
+	ORTC_tree=new ORTC_node[ORTC_nnum];
+
+	if(CCencoding_enable==1){
+		KeySwitch=-1;
+		temp=get_maxORT(KeySwitch, flag, IP, ORTC_nnum, ORTC_leafnnum, ORTC_tree, ST);
+		if(temp<FinalAnswer)
+			FinalAnswer=temp;
+	}
 
 	KeySwitch=0;
 	temp=get_maxORT(KeySwitch, flag, IP, ORTC_nnum, ORTC_leafnnum, ORTC_tree, ST);
@@ -531,6 +648,14 @@ int CCencoding_ORTC(int (*ST)[TotalTNum], ofstream &output){
     //printRange(serverNum+singleLSNum, Smax, currentMS);
     }
 
+  KeySwitch=serverNum;
+  temp=get_maxORT(KeySwitch, flag, IP, ORTC_nnum, ORTC_leafnnum, ORTC_tree, ST);
+  if(temp<FinalAnswer){
+	  FinalAnswer=temp;
+	  // printRange(0, serverNum, currentMS);
+	  // printRange(serverNum, serverNum+singleLSNum, currentMS);
+	  //printRange(serverNum+singleLSNum, Smax, currentMS);
+  }
 
 /*	for(int i=0; i<LevelNum; i++){
 		KeySwitch=serverNum+singleLSNum*i;
@@ -539,6 +664,8 @@ int CCencoding_ORTC(int (*ST)[TotalTNum], ofstream &output){
 			FinalAnswer=temp;
 	}*/ 
 
+    output<<"the total number of paths is: "<<(TotalTNum*(serverNum-1))<<endl;
+    output<<"the total number of path sets is: "<<TotalTNum<<endl;
 	output<<"the routing table size is: "<<FinalAnswer<<endl;
 
 	delete[] IP;
