@@ -15,4 +15,4 @@ const int MapLen=3;
 const int Intbitlen=sizeof(int)*8;
 const int EclassNum=1; // number of equivalent classes
 const int EclassSID[EclassNum]={0}; //IDs of representative switches for each equivalent class  
-const int CCencoding_enable=1;
+const int CCencoding_enable=0;
