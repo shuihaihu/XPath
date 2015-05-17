@@ -1,5 +1,5 @@
-const int DA=40;
-const int DI=16;
+const int DA=20;
+const int DI=8;
 const int TorSNum=DA*DI/4;
 const int AggrSNum=DI;
 const int IntSNum=DA/2;
@@ -15,6 +15,10 @@ const int MaxExchangetime=100;
 const int MaxOPtimalNum=TotalTNum*3/11;
 const int ClassNum=3;
 const int IPv4len=32;
-int IPsegsz[IPv4len]={0};
+unsigned int IPsegsz[IPv4len]={0};
 const int MapLen=4;
 const int Intbitlen=sizeof(int)*8;
+const int EclassNum=3; // number of equivalent classes
+const int EclassSID[EclassNum]={0, TorSNum, TorSNum+AggrSNum}; //IDs of representative switches for each equivalent class  
+const int CCencoding_enable=0;
+
